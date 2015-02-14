@@ -3,13 +3,15 @@ String[][] animal;
 int rowCount;
 int[][] dist;
 float theta;
+int[][] par;
 
 void setup() {
-  size(1000, 800);
+  size(808, 800);
   table = loadTable("data/zoo.csv", "header");
   rowCount = table.getRowCount();
   animal = new String[rowCount][18];
   dist = new int[rowCount][rowCount];
+  par = new int[rowCount][rowCount];
   int x;
   for (int i=0; i<rowCount; i++) {
     TableRow row = table.getRow(i);
@@ -33,17 +35,17 @@ void setup() {
     animal[i][17] = str(row.getInt("type"));
   }
   Distance(animal, animal);
-  minDistance(0);
+  minDistance();
 }
 
 // function computs the smallest distance
-void minDistance(int a) {
+void minDistance() {
   int minDist=50;
-  for (int b=0; b<rowCount; b++) {
-    if (dist[a][b] <= minDist && a != b) {
-      minDist = dist[a][b];
-      println(b);
-      minDist = 2;
+  for (int a=0; a<rowCount; a++) {
+    for (int b=0; b<rowCount; b++) {
+      if (dist[a][b] <= minDist && a != b) {
+        minDist = dist[a][b];
+      }
     }
   }
 }
@@ -65,45 +67,54 @@ void Distance(String[][] a, String[][] b) {
 
 void draw() {
   background(0);
-  frameRate(30);
+  //frameRate(30);
   stroke(255);
   // Let's pick an angle 0 to 90 degrees based on the mouse position
   //float a = (mouseX / (float) width) * 90f;
-  float a = 30;
+  //float a = 30;
   // Convert it to radians
-  theta = radians(a);
+  //theta = radians(a);
   // Start the tree from the bottom of the screen
-  translate(width/2,height);
+  //translate(width/2,height);
   // Draw a line 120 pixels
   //line(0,0,0,-120);
   // Move to the end of that line
   //translate(0,-120);
-  // Start the recursive branching!
-  branch(20);//distance of branch
 
-}
-
-void branch(float h) {
-  // Each branch will be 2/3rds the size of the previous one
-  h *= .66;
-  
-  // All recursive functions must have an exit condition!!!!
-  // Here, ours is when the length of the branch is 2 pixels or less
-  if (h > 2) {
-    pushMatrix();    // Save the current state of transformation (i.e. where are we now)
-    rotate(theta);   // Rotate by theta
-    line(0, 0, 0, -h);  // Draw the branch
-    translate(0, -h); // Move to the end of the branch
-    branch(h);       // Ok, now call myself to draw two new branches!!
-    popMatrix();     // Whenever we get back here, we "pop" in order to restore the previous matrix state
-    
-    // Repeat the same thing, only branch off to the "left" this time!
+  int w = width/(rowCount+1);
+  for (int i=1; i< (rowCount+2); i++) {
     pushMatrix();
-    rotate(-theta);
-    line(0, 0, 0, -h);
-    translate(0, -h);
-    //branch(h);
+    translate(w*i, height);
+    point(0, -10);
     popMatrix();
   }
+
+
+  // Start the recursive branching!
+  //branch(20);//distance of branch
 }
+
+//void branch(float h) {
+//  // Each branch will be 2/3rds the size of the previous one
+//  h *= .66;
+//
+//  // All recursive functions must have an exit condition!!!!
+//  // Here, ours is when the length of the branch is 2 pixels or less
+//  if (h > 2) {
+//    pushMatrix();    // Save the current state of transformation (i.e. where are we now)
+//    rotate(theta);   // Rotate by theta
+//    line(0, 0, 0, -h);  // Draw the branch
+//    translate(0, -h); // Move to the end of the branch
+//    branch(h);       // Ok, now call myself to draw two new branches!!
+//    popMatrix();     // Whenever we get back here, we "pop" in order to restore the previous matrix state
+//
+//    // Repeat the same thing, only branch off to the "left" this time!
+//    pushMatrix();
+//    rotate(-theta);
+//    line(0, 0, 0, -h);
+//    translate(0, -h);
+//    //branch(h);
+//    popMatrix();
+//  }
+//}
 
