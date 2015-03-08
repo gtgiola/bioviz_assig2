@@ -90,6 +90,8 @@
 				var minDist = Infinity;
 				var child1,child2;
 				if (distancetable.length <= 1){
+					szoo[szoo.length] = {"name" : pcount, "parent" : "null", "distance" : 5};
+					console.log(szoo);
 					return distancetable;
 				}
 				for(var i=0; i<distancetable.length; i++){
@@ -171,7 +173,7 @@
 					distancetable[i].distspot = distancetable[distspot][i];
 					distancetable[i].splice(Math.max(child1, child2), 1);
 				}
-				//console.log(distancetable);
+				console.log(distancetable);
 				return Sort(distancetable);
 			}
 			function makeParentdist(child1, child2){
