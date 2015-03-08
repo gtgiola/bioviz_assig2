@@ -1,0 +1,255 @@
+<html>
+	<head>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<title>BioViz Assig4</title>
+		<style>
+			.node circle {
+				fill: #fff;
+				stroke: steelblue;
+				stroke-width: 3px;
+			}
+			.node text { font: 12px sans-serif; }
+			.link {
+				fill: none;
+				stroke: #ccc;
+				stroke-width: 2px;
+			}
+		</style>
+	</head>
+	<body>	
+		<script>
+			/*var szoo = [
+				{ "name" : "A", "parent":"Test", "distance":"3" },
+				{ "name" : "Test", "parent":"null", "distance":"2" },
+				{ "name" : "C", "parent":"A", "distance":"6" },
+				{ "name" : "D", "parent":"B", "distance":"4" },
+				{ "name" : "B", "parent":"Test", "distance":"1" }
+			];/*/
+			//Get Data
+			var zoo = [];
+			var distancetable = [];
+			d3.csv("zoosmall.csv", function(data){
+				zoo = data.map(function(d) {return [ 
+					d["animalname"],
+					d["hair"],
+					d["feathers"],
+					d["eggs"],
+					d["milk"],
+					d["airborne"],
+					d["aquatic"],
+					d["predator"],
+					d["toothed"],
+					d["backbone"],
+					d["breathes"],
+					d["venomous"],
+					d["fins"],
+					+d["legs"],
+					d["tail"],
+					d["domestic"],
+					d["catsize"],
+					+d["type"],
+				];});
+				//console.log(zoo);
+				for (i=0;i<zoo.length;i++){
+					distancetable[i] = new Array();
+					for (j=0;j<zoo.length;j++){
+						distancetable[i][j] = 0;
+					}
+				}
+				//DisTable(zoo)
+				Sort(DisTable(zoo));
+			});
+			//Distance Table
+			function DisTable(zoo){
+				for (var i=0;i<zoo.length;i++){
+					for(var j=0; j<zoo.length;j++){
+						var dist = Distance(zoo[i],zoo[j]);
+						distancetable[i][j] = dist;
+						//console.log(distancetable.length);
+						//console.log(dist);
+					}
+				}
+				//console.log(distancetable);
+				return distancetable;
+			}
+			//Distance between two animals
+			function Distance(animal1, animal2){
+				var dist=0;
+				for (var i=1; i<17; i++){
+					if(animal1[i] !== animal2[i]){
+						dist++;
+					}
+				}
+				//console.log(dist);
+				return(dist);
+			}
+			//Sorts list of animals by distance
+			var szoo = [];
+			var pcount=1;
+			function Sort(distancetable){
+				var minDist = Infinity;
+				var child1,child2;
+				if (distancetable.length <= 1){
+					return distancetable;
+				}
+				for(var i=0; i<distancetable.length; i++){
+					for(var j=1; j<distancetable[i].length; j++){
+						if (distancetable[i][j]<minDist && i!=j){
+							minDist=distancetable[i][j];
+							child1=i;
+							child2=j;
+						}
+					}
+				}
+				//console.log(child1,child2);
+				console.log(distancetable[child1]);
+				console.log(distancetable[child2]);
+				var distspot = Math.min(child1, child2)
+				distancetable[distspot] = makeParentdist(distancetable[child1], distancetable[child2]);
+				//console.log(distancetable[distspot]);
+				console.log(szoo);
+				console.log(zoo[child1][0], zoo[child2][0]);
+				if(szoo.length == 0){
+					szoo[szoo.length] = {"name" : zoo[child1][0], "parent" : pcount, "distance" : minDist};
+					szoo[szoo.length] = {"name" : zoo[child2][0], "parent" : pcount, "distance" : minDist};
+					szoo[szoo.length] = {"name" : pcount, "parent" : pcount+1, "distance": minDist};
+					pcount = pcount+2;
+				} else if (szoo.length <= 3){
+					for (var i=0; i<szoo.length; i++){
+						//console.log(szoo.length);
+						console.log(szoo[i].name);
+						if (szoo[i].name == zoo[child1][0] || szoo[i].name == zoo[child2][0]){//14 levels
+							if (szoo[i].name == zoo[child1][0]){
+								var par = szoo[i].parent;
+								szoo[szoo.length] = {"name" : zoo[child2][0], "parent" : par, "distance" : minDist};
+							} else {
+								var par = szoo[i].parent;
+								szoo[szoo.length] = {"name" : zoo[child1][0], "parent" : par, "distance" : minDist};
+							}
+							pcount = pcount + 1;
+							break
+						} else {
+							szoo[szoo.length] = {"name" : zoo[child1][0], "parent" : pcount, "distance" : minDist};
+							szoo[szoo.length] = {"name" : zoo[child2][0], "parent" : pcount, "distance" : minDist};
+							szoo[szoo.length] = {"name" : pcount, "parent" : pcount+1, "distance": minDist};
+							pcount = pcount+2;
+							break
+						}
+					}
+				} else if (szoo.length <= 6){
+					for (var i=0; i<szoo.length; i++){
+						//console.log(szoo.length);
+						console.log(szoo[i].name);
+						if (szoo[i].name == zoo[child1][0] && szoo[i+1].name == zoo[child2][0]){
+							var par = szoo[i].parent;
+							szoo[szoo.length] = {"name" : par, "parent" : pcount, "distance" : minDist};
+							pcount = pcount + 1;
+							break
+							//szoo[i+1].name==zoo[child2][0]
+						} else if (szoo[i].name == zoo[child1][0] || szoo[i].name == zoo[child2][0]){//14 levels
+							if (szoo[i].name == zoo[child1][0]){
+								var par = szoo[i].parent;
+								szoo[szoo.length] = {"name" : zoo[child2][0], "parent" : par, "distance" : minDist};
+							} else {
+								var par = szoo[i].parent;
+								szoo[szoo.length] = {"name" : zoo[child1][0], "parent" : par, "distance" : minDist};
+							}
+							pcount = pcount + 1;
+							break
+						} else {
+							szoo[szoo.length] = {"name" : zoo[child1][0], "parent" : pcount, "distance" : minDist};
+							szoo[szoo.length] = {"name" : zoo[child2][0], "parent" : pcount, "distance" : minDist};
+							szoo[szoo.length] = {"name" : pcount, "parent" : pcount+1, "distance": minDist};
+							pcount = pcount+2;
+							break
+						}
+					}
+				}
+				//console.log(szoo);
+				distancetable.splice(Math.max(child1, child2), 1);
+				for (var i=0; i<distancetable.length; i++){
+					distancetable[i].distspot = distancetable[distspot][i];
+					distancetable[i].splice(Math.max(child1, child2), 1);
+				}
+				//console.log(distancetable);
+				return Sort(distancetable);
+			}
+			function makeParentdist(child1, child2){
+				var minDist = [];
+				for(var i=0; i<child1.length; i++){
+					if(i!=child1 || i!=child2){
+						minDist.push(Math.min(child1[i], child2[i]));
+					}
+				}
+				return minDist;
+			}
+			/*/
+			// *********** Convert flat data into a nice tree ***************
+			// create a name: node map
+			var dataMap = szoo.reduce(function(map, node) {
+				map[node.name] = node;
+				return map;
+			}, {});
+			// create the tree array
+			var treeData = [];
+			szoo.forEach(function(node) {
+				// add to parent
+				var parent = dataMap[node.parent];
+				if (parent) {
+					// create child array if it doesn't exist
+					(parent.children || (parent.children = []))
+					// add node to child array
+					.push(node);
+				} else {
+					// parent is null or missing
+					treeData.push(node);
+				}
+			});
+			// ************** Generate the tree diagram	 *****************
+			var width = 960, height = 500;
+			var i = 0;
+			var tree = d3.layout.tree()
+				.size([height, width]);
+			var diagonal = d3.svg.diagonal()
+				.projection(function(d) { return [d.y, d.x]; });
+			var svg = d3.select("body").append("svg")
+				.attr("width", width)
+				.attr("height", height)
+				.append("g")
+				.attr("transform", "translate(120,20)");
+			root = treeData[0];
+			update(root);
+			function update(source) {
+				// Compute the new tree layout.
+				var nodes = tree.nodes(root).reverse(),
+				links = tree.links(nodes);
+				// Normalize for fixed-depth.
+				nodes.forEach(function(d) { d.y = d.depth * 180; });
+				// Declare the nodes…
+				var node = svg.selectAll("g.node")
+					.data(nodes, function(d) { return d.id || (d.id = ++i); });
+				// Enter the nodes.
+				var nodeEnter = node.enter().append("g")
+					.attr("class", "node")
+					.attr("transform", function(d) { 
+					return "translate(" + d.y + "," + d.x + ")"; });
+				nodeEnter.append("circle")
+					.attr("r", 10)
+					.style("fill", "#fff");
+				nodeEnter.append("text")
+					.attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+					.attr("dy", ".35em")
+					.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+					.text(function(d) { return d.name; })
+					.style("fill-opacity", 1);
+				// Declare the links…
+				var link = svg.selectAll("path.link")
+					.data(links, function(d) { return d.target.id; });
+				// Enter the links.
+				link.enter().insert("path", "g")
+					.attr("class", "link")
+					.attr("d", diagonal);
+			}//*/
+		</script>
+	</body>
+</html>
